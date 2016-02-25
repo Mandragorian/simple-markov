@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 import random as rnd
-from itertools import accumulate
+
+
+try:
+    from itertools import accumulate
+except ImportError:
+    from utils import accumulate
+
 
 import bisect
 import sys, time
@@ -84,3 +90,6 @@ class MarkovChain(object):
         self.steps += 1
         self.current_state = self.states[self.current_state].next_state()
         return self.current_state
+
+    def next(self):
+        return self.__next__()
