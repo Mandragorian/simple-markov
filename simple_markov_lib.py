@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 import random as rnd
 
-
+# import accumulate from utils if python v3.x
+# is not available
 try:
     from itertools import accumulate
 except ImportError:
     from utils import accumulate
 
+# scipy - numpy imports for probability matrix algebra
+from scipy import sparse
+import numpy as np
 
 import bisect
-import sys, time
 
 class State(object):
     """
@@ -60,6 +63,26 @@ class MarkovChain(object):
             k: State(transition_table[k], k) for k in transition_table
         }
 
+        # create a frame that holds (row, column, value) entries
+        # which will be used later to create the sparse array
+        sparse_frame = []
+        labels = sorted(key for key in self.states)
+        for i, key in enumerate(labels):
+            for j, _ in enumerate(labels):
+                try:
+                    sparse_frame.append((transition_table[key][j][1], i, j))
+                except KeyError:
+                    # continue with next element
+                    continue
+                except IndexError:
+                    # continue with next element
+                    continue
+
+        # get data and row - column vectors for sparse representation
+        data, row, col = zip(*sparse_frame)
+        sz = len(labels)
+        self.prob_matrix = sparse.coo_matrix((data, (row, col)), shape=(sz, sz))
+
     def __iter__(self):
         """
         Makes this object iterable - chooses an initial state.
@@ -93,3 +116,42 @@ class MarkovChain(object):
 
     def next(self):
         return self.__next__()
+
+    def state_probabilities(self, steps=1):
+        """
+        Calculates the probability of the markov chain's states in the future
+        after a specified number of steps (default 1).
+
+        :param to_state: the state to be reached in the future
+        :param steps: the number of steps
+        :return a map of state - transition probability pairs
+
+        Example:
+
+        >>> m_chain = new MarkovChain(
+                {'A': 0.5, 'B': 0.5},
+                {'A': [('A', 1.0)],
+                'B': [('A', 0.2), ('B', 0.8)]
+                })
+
+        >>> m_chain.state_probabilities()
+        {'A': 0.6, 'B', 0.4}
+
+        """
+        
+        labels = sorted(self.initial_probs)
+        tran_matrix = self.prob_matrix.toarray()
+        # adjust transition matrix according to number of steps
+        if steps > 1:
+            tran_matrix = np.linalg.matrix_power(tran_matrix, steps)
+
+        # vector of by-label sorted initial probabilities
+        init_probs_vec = np.array([
+            self.initial_probs[key] for key in labels
+        ])
+
+        # pi_i * P(i, j)
+        future_probs_vec = np.dot(init_probs_vec, tran_matrix)
+        return {
+            v[0]: v[1] for v in zip(labels, future_probs_vec)
+        }
