@@ -43,6 +43,21 @@ class State(object):
         coin_toss = rnd.uniform(0, 1)
         return list(self.prob)[bisect.bisect_left(self.cum_prob, coin_toss)]
 
+    def to_dot_line(self):
+        """
+        Creates a DOT format representation for this state, where transitions
+        are represented as directed arcs labelled by the transition
+        probability. The representation returned is not complete, but instead
+        intended to be used in MarkovChain's to_dot() function.
+
+        :return a representation of the state and transitions in a
+        DOT-formatted line
+        """
+        # anonymous function that creates the DOT lines
+        lb = lambda x, y: '\t{0} -> {1} [label="{2}"]'.format(self.label, x, y)
+
+        return '\n'.join(lb(i, j) for i, j in self.prob.items())
+
 class MarkovChain(object):
     """
     An iterable that represents a discrete time Markov Chain.
@@ -154,3 +169,14 @@ class MarkovChain(object):
         return {
             v[0]: v[1] for v in zip(labels, future_probs_vec)
         }
+
+    def to_dot(self):
+        """
+        Creates a DOT format representation of this chain, where states
+        are represented as labelled nodes and transitions as directed arcs
+        labelled by their probabilities.
+
+        :return a string representation of the markov chain in DOT format
+        """
+        states_repr = "\n".join(s.to_dot_line() for s in self.states.values())
+        return "digraph {\n" + states_repr + "\n}"
