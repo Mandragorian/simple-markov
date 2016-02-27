@@ -68,7 +68,7 @@ class MarkovChain(object):
         sparse_frame = []
         labels = sorted(key for key in self.states)
         for i, key in enumerate(labels):
-            for j, _ in enumerate(labels):
+            for j in range(len(labels)):
                 try:
                     sparse_frame.append((transition_table[key][j][1], i, j))
                 except KeyError:
@@ -122,13 +122,12 @@ class MarkovChain(object):
         Calculates the probability of the markov chain's states in the future
         after a specified number of steps (default 1).
 
-        :param to_state: the state to be reached in the future
         :param steps: the number of steps
         :return a map of state - transition probability pairs
 
         Example:
 
-        >>> m_chain = new MarkovChain(
+        >>> m_chain = MarkovChain(
                 {'A': 0.5, 'B': 0.5},
                 {'A': [('A', 1.0)],
                 'B': [('A', 0.2), ('B', 0.8)]
