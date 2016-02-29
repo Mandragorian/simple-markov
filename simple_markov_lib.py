@@ -43,6 +43,21 @@ class State(object):
         coin_toss = rnd.uniform(0, 1)
         return list(self.prob)[bisect.bisect_left(self.cum_prob, coin_toss)]
 
+    def to_dot_line(self):
+        """
+        Creates a DOT format representation for this state, where transitions
+        are represented as directed arcs labelled by the transition
+        probability. The representation returned is not complete, but instead
+        intended to be used in MarkovChain's to_dot() function.
+
+        :return a representation of the state and transitions in a
+        DOT-formatted line
+        """
+        # anonymous function that creates the DOT lines
+        lb = lambda x, y: '\t{0} -> {1} [label="{2}"]'.format(self.label, x, y)
+
+        return '\n'.join(lb(i, j) for i, j in self.prob.items())
+
 class MarkovChain(object):
     """
     An iterable that represents a discrete time Markov Chain.
@@ -68,7 +83,7 @@ class MarkovChain(object):
         sparse_frame = []
         labels = sorted(key for key in self.states)
         for i, key in enumerate(labels):
-            for j, _ in enumerate(labels):
+            for j in range(len(labels)):
                 try:
                     sparse_frame.append((transition_table[key][j][1], i, j))
                 except KeyError:
@@ -122,13 +137,12 @@ class MarkovChain(object):
         Calculates the probability of the markov chain's states in the future
         after a specified number of steps (default 1).
 
-        :param to_state: the state to be reached in the future
         :param steps: the number of steps
         :return a map of state - transition probability pairs
 
         Example:
 
-        >>> m_chain = new MarkovChain(
+        >>> m_chain = MarkovChain(
                 {'A': 0.5, 'B': 0.5},
                 {'A': [('A', 1.0)],
                 'B': [('A', 0.2), ('B', 0.8)]
@@ -155,3 +169,14 @@ class MarkovChain(object):
         return {
             v[0]: v[1] for v in zip(labels, future_probs_vec)
         }
+
+    def to_dot(self):
+        """
+        Creates a DOT format representation of this chain, where states
+        are represented as labelled nodes and transitions as directed arcs
+        labelled by their probabilities.
+
+        :return a string representation of the markov chain in DOT format
+        """
+        states_repr = "\n".join(s.to_dot_line() for s in self.states.values())
+        return "digraph {\n" + states_repr + "\n}"
