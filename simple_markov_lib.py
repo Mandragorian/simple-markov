@@ -8,6 +8,10 @@ try:
 except ImportError:
     from utils import accumulate
 
+# import strongly_connected_components function for
+# MarkovChain.communication_classes()
+from utils import strongly_connected_components
+
 # scipy - numpy imports for probability matrix algebra
 from scipy import sparse
 import numpy as np
@@ -169,6 +173,52 @@ class MarkovChain(object):
         return {
             v[0]: v[1] for v in zip(labels, future_probs_vec)
         }
+
+    def to_graph(self):
+        """
+        Converts the markov chain into a graph representation, where the
+        chain's states become the graph's vertices and the transitions become
+        directed edges, if their probability is higher than 0.
+        The chain's graph representation is implemented by a dictionary mapping
+        nodes (keys) to dictionaries containing transitions along with their
+        probabilities (weighted edges).
+
+        Example:
+
+        >>> chain.to_graph()
+        {
+            'A': {'A': 0.1, 'B': 0.9},
+            'B': {'A': 0.3, 'C': 0.7},
+            'C': {'A': 0.5, 'B': 0.5}
+        }
+
+        :return the chain's graph representation
+        """
+        return { s: self.states[s].prob for s in self.states }
+
+    def communication_classes(self):
+        """
+        Finds the communication classes of this markov chain by applying
+        Tarjan's strongly connected components algorithm to the chain's
+        digraph.
+
+        Example:
+
+        >>> m_chain = MarkovChain(
+            {'A': 0.3, 'B': 0.5, 'C': 0.2},
+            {
+                'A': [('A', 0.2), ('B', 0.8)],
+                'B': [('A', 0.5), ('B', 0.3), (C', 0.2)],
+                'C': [('C', 1.0)]
+            })
+
+        >>> m_chain.communication_classes()
+        [{'C'}, {'A', 'B'}]
+
+        :return a list with all the communication classes of this chain
+        """
+
+        return strongly_connected_components(self.to_graph())
 
     def to_dot(self):
         """
