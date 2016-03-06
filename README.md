@@ -62,5 +62,15 @@ states_after = chain.state_probabilities(3)
 print(states_after)  # prints {'Heads': 0.744, 'Tails': 0.256}
 ```
 
+### Running the tests
+Test files for `simple_markov_lib` are included in the `tests/` subfolder.
+Run them with
+
+```bash
+$ python -m unittest
+```
+
+as long as your current working directory is the project's root folder.
+
 [orig-code]: http://www.math.ntua.gr/~loulakis/info/python_codes_files/
 [tetraktida]: https://github.com/tetraktida
