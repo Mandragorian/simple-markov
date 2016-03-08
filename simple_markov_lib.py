@@ -159,13 +159,13 @@ class MarkovChain(object):
         if (steps <= 0):
             return
 
-        # initialize self as iterable
+        # initialize iterable
         it = iter(self)
         simulation_step = 0
 
         while simulation_step < steps:
             try:
-                next_state = self.__next__()
+                next_state = next(it)
             except StopIteration:
                 return
 
