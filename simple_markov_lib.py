@@ -136,6 +136,33 @@ class MarkovChain(object):
     def next(self):
         return self.__next__()
 
+    def run_for(self, steps):
+        """
+        Simulate the markov chain for a specified number of steps.
+
+        :param steps: the number of steps to simulate
+        :return a sequence of states, raises StopIteration if limit has been
+        reached
+        """
+
+        # if negative number of steps has been given, return
+        if (steps <= 0):
+            return
+
+        # initialize self as iterable
+        it = iter(self)
+        simulation_step = 0
+
+        while simulation_step < steps:
+            try:
+                next_state = self.__next__()
+            except StopIteration:
+                return
+
+            # update simulation step
+            simulation_step += 1
+            yield next_state
+
     def state_probabilities(self, steps=1):
         """
         Calculates the probability of the markov chain's states in the future
