@@ -139,10 +139,20 @@ class MarkovChain(object):
     def run_for(self, steps):
         """
         Simulate the markov chain for a specified number of steps.
+        Example:
+
+        >>> chain = MarkovChain(
+                {'A': 0.5,'B': 0.5},
+                {'A': [('A', 0.4), ('B', 0.6)],
+                 'B': [('A', 0.8), ('B', 0.2)]
+                })
+
+        >>> states = [i for i in chain.run_for(5)]
+        >>> states[4]
+        'A'
 
         :param steps: the number of steps to simulate
-        :return a sequence of states, raises StopIteration if limit has been
-        reached
+        :return a sequence of states as a generator expression
         """
 
         # if negative number of steps has been given, return
