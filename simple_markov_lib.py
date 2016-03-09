@@ -42,7 +42,7 @@ class State(object):
         the result falls into, and returning the state associated with the
         interval.
 
-        :return the next state, chosen at random
+        :returns: the next state, chosen at random
         """
         coin_toss = rnd.uniform(0, 1)
         return list(self.prob)[bisect.bisect_left(self.cum_prob, coin_toss)]
@@ -54,8 +54,7 @@ class State(object):
         probability. The representation returned is not complete, but instead
         intended to be used in MarkovChain's to_dot() function.
 
-        :return a representation of the state and transitions in a
-        DOT-formatted line
+        :returns: a representation of the state in DOT format
         """
         # anonymous function that creates the DOT lines
         lb = lambda x, y: '\t{0} -> {1} [label="{2}"]'.format(self.label, x, y)
@@ -139,7 +138,8 @@ class MarkovChain(object):
     def run_for(self, steps):
         """
         Simulate the markov chain for a specified number of steps.
-        Example:
+        :param steps: the number of steps to simulate
+        :returns: a sequence of states as a generator expression
 
         >>> chain = MarkovChain(
                 {'A': 0.5,'B': 0.5},
@@ -151,8 +151,6 @@ class MarkovChain(object):
         >>> states[4]
         'A'
 
-        :param steps: the number of steps to simulate
-        :return a sequence of states as a generator expression
         """
 
         # if negative number of steps has been given, return
@@ -179,9 +177,7 @@ class MarkovChain(object):
         after a specified number of steps (default 1).
 
         :param steps: the number of steps
-        :return a map of state - transition probability pairs
-
-        Example:
+        :returns: a map of state - transition probability pairs
 
         >>> m_chain = MarkovChain(
                 {'A': 0.5, 'B': 0.5},
@@ -220,7 +216,7 @@ class MarkovChain(object):
         nodes (keys) to dictionaries containing transitions along with their
         probabilities (weighted edges).
 
-        Example:
+        :returns: the chain's graph representation
 
         >>> chain.to_graph()
         {
@@ -229,7 +225,6 @@ class MarkovChain(object):
             'C': {'A': 0.5, 'B': 0.5}
         }
 
-        :return the chain's graph representation
         """
         return { s: self.states[s].prob for s in self.states }
 
@@ -239,20 +234,19 @@ class MarkovChain(object):
         Tarjan's strongly connected components algorithm to the chain's
         digraph.
 
-        Example:
+        :returns: a list with all the communication classes of this chain
 
         >>> m_chain = MarkovChain(
             {'A': 0.3, 'B': 0.5, 'C': 0.2},
             {
                 'A': [('A', 0.2), ('B', 0.8)],
-                'B': [('A', 0.5), ('B', 0.3), (C', 0.2)],
+                'B': [('A', 0.5), ('B', 0.3), ('C', 0.2)],
                 'C': [('C', 1.0)]
             })
-
+        
         >>> m_chain.communication_classes()
         [{'C'}, {'A', 'B'}]
 
-        :return a list with all the communication classes of this chain
         """
 
         return strongly_connected_components(self.to_graph())
@@ -263,7 +257,7 @@ class MarkovChain(object):
         are represented as labelled nodes and transitions as directed arcs
         labelled by their probabilities.
 
-        :return a string representation of the markov chain in DOT format
+        :returns: a string representation of the markov chain in DOT format
         """
         states_repr = "\n".join(s.to_dot_line() for s in self.states.values())
         return "digraph {\n" + states_repr + "\n}"
