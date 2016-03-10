@@ -5,6 +5,10 @@ def accumulate(iterable, func=operator.add):
     Return the running total in a list using the addition operator by
     default.
 
+    :param iterable: the iterable to be traversed
+    :param func: the operation to be performed
+    :returns: the running total in the iterable
+
     >>> accumulate([1,2,3,4,5]) # 1 3 6 10 15
     >>> accumulate([1,2,3,4,5], operator.mul) # 1 2 6 24 120
     """
@@ -24,7 +28,16 @@ def strongly_connected_components(graph):
     Find the stronly connected components of a graph by applying Tarjan's
     algorithm on a graph.
 
-    :return a list containing all strongly connected components of the graph
+    :param graph: a graph in dict notation.
+    :returns: a list containing all strongly connected components of the graph
+
+    >>> strongly_connected_components({
+        'A': {'B': 0.6, 'C': 0.4},
+        'B': {'C': 0.2, 'B': 0.8},
+        'C': {'B': 0.5, 'C': 0.5}
+        })
+    [{'B', 'C'}, {'A'}]
+
     """
     index, lowlinks = {}, {}
     stack, result = [], []
