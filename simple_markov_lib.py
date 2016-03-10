@@ -237,7 +237,8 @@ class MarkovChain(object):
         """
         Finds the communication classes of this markov chain by applying
         Tarjan's strongly connected components algorithm to the chain's
-        digraph.
+        digraph. For each class, also returns info about whether it is
+        open or closed.
 
         Example:
 
@@ -250,9 +251,10 @@ class MarkovChain(object):
             })
 
         >>> m_chain.communication_classes()
-        [{'C'}, {'A', 'B'}]
+        [{'states': {'C'}, 'type': 'closed'},
+         {'states': {'A', 'B'}, 'type': 'open'}]
 
-        :return a list with all the communication classes of this chain
+        :return a set containing the chain's communication classes
         """
 
         return strongly_connected_components(self.to_graph())
