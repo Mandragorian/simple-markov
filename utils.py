@@ -67,14 +67,29 @@ def strongly_connected_components(graph):
 
         # if node is a root node, generate a stronly connected component
         if lowlinks[node] == index[node]:
-            connected_component = []
+            connected_component = set()
+
+            # keep a list of reachable neighbours in order to determine
+            # if the component is closed or open
+            neighbours = set()
             while True:
                 succ = stack.pop()
-                connected_component.append(succ)
+                connected_component.add(succ)
+
+                # add all neighbours to set
+                for nb in graph[succ]:
+                    neighbours.add(nb)
                 if succ == node:
                     break
-            component = set(connected_component)
-            result.append(component)
+
+            # check if neighbours are a subset of the connected component
+            cp_type = "closed" if neighbours <= connected_component else "open"
+
+            # return a dict containing component info
+            result.append({
+                "states": connected_component,
+                "type": cp_type
+            })
 
     # apply the connect() method on all nodes
     for node in graph:

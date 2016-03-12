@@ -16,6 +16,9 @@ from utils import strongly_connected_components
 from scipy import sparse
 import numpy as np
 
+# import graphviz for graph drawing
+import graphviz as gv
+
 import bisect
 
 class State(object):
@@ -47,19 +50,27 @@ class State(object):
         coin_toss = rnd.uniform(0, 1)
         return list(self.prob)[bisect.bisect_left(self.cum_prob, coin_toss)]
 
-    def to_dot_line(self):
+    def accessible_states(self):
         """
-        Creates a DOT format representation for this state, where transitions
-        are represented as directed arcs labelled by the transition
-        probability. The representation returned is not complete, but instead
-        intended to be used in MarkovChain's to_dot() function.
+        Returns a set containing all the states accessible from this
+        state, or equivalently all keys of the transition table.
 
-        :returns: a representation of the state in DOT format
+        :returns: a set containing all the states this state can lead to
         """
-        # anonymous function that creates the DOT lines
-        lb = lambda x, y: '\t{0} -> {1} [label="{2}"]'.format(self.label, x, y)
+        return set(i for i in self.prob)
 
-        return '\n'.join(lb(i, j) for i, j in self.prob.items())
+    def populate_graph(self, graph):
+        """
+        Populates a graphviz.Digraph object with the transitions that
+        this state contains.
+
+        :param graph: a graphviz.Digraph object to be populated
+        """
+        # add edges for all transitions with corresponding costs
+        for (state_to, cost) in self.prob.items():
+            graph.edge(self.label, state_to, label=str(cost))
+        # [NOTE: graphviz.Digraph objects are mutable, so there is
+        #  no need for this function to return the modified object]
 
 class MarkovChain(object):
     """
@@ -232,9 +243,8 @@ class MarkovChain(object):
         """
         Finds the communication classes of this markov chain by applying
         Tarjan's strongly connected components algorithm to the chain's
-        digraph.
-
-        :returns: a list with all the communication classes of this chain
+        digraph. For each class, also returns info about whether it is
+        open or closed.
 
         >>> m_chain = MarkovChain(
             {'A': 0.3, 'B': 0.5, 'C': 0.2},
@@ -245,19 +255,120 @@ class MarkovChain(object):
             })
         
         >>> m_chain.communication_classes()
-        [{'C'}, {'A', 'B'}]
+        [{'states': {'C'}, 'type': 'closed'},
+         {'states': {'A', 'B'}, 'type': 'open'}]
 
+        :returns: a set containing the chain's communication classes
         """
 
         return strongly_connected_components(self.to_graph())
 
-    def to_dot(self):
+    def get_class_connections(self):
+        """
+        Finds the communication classes of this chain and subsequently finds
+        all connections between them.
+
+        :returns: a dictionary containing all inter-class connections, where
+         keys / values are tuples / lists of tuples containing the class 
+         states.
+
+        >>> ch = MarkovChain(
+                {'A' : 0.2, 'B': 0.2, 'C': 0.3, 'D': 0.3},
+                {
+                    'A': [('A', 0.5), ('B', 0.5)],
+                    'B': [('A', 0.9), ('C', 0.1)],
+                    'C': [('C', 0.9), ('D', 0.1)],
+                    'D': [('C', 0.5), ('D', 0.5)]
+                })
+
+        >>> ch.get_class_connections()
+        {('A', 'B'): [('C', 'D')], ('C', 'D'): []}
+
+        """
+        # get the classes first
+        c_classes = self.communication_classes()
+
+        # anonymous fun that checks if a state belongs to another class (x)
+        # in a list of classes provided this class does not have the same states
+        # as (y).
+        filt = lambda s, x, y: s in x['states'] if x['states'] != y else False
+
+        # find all open classes
+        open_classes = filter(lambda x: x['type'] == 'open', c_classes)
+
+        # dict containing class -> class accessibility mappings
+        class_conns = {tuple(i['states']): [] for i in c_classes}
+
+        # for each open communication class, find out which other
+        # classes it communicates with
+        for s_set in (i['states'] for i in open_classes):
+            # states accessible from this class
+            can_access = set.union(
+                *(self.states[s].accessible_states() for s in s_set)
+            )
+
+            for acc in can_access:
+                # find all classes accessible from this one by keeping only
+                # classes whose states contain any state from the accessible
+                # set.
+                found = filter(lambda x: filt(acc, x, s_set), c_classes)
+                class_conns[tuple(s_set)].extend(tuple(i['states']) for i in found)
+
+        return class_conns
+
+    def draw_class_connections(self, return_graph = False):
+        """
+        Finds all connections between communication classes in this markov
+        chain and draws them in a graph in DOT format.
+
+        :param return_graph: a boolean indicating if the underlying
+         graphviz.Digraph object should be returned instead of the DOT string.
+
+        :returns: a representation of inter-class connections in DOT format.
+
+        >>> ch = MarkovChain(
+                {'A': 0.5, 'B': 0.25, 'C': 0.25},
+                {
+                    'A': [('A', 0.5), ('B', 0.5)],
+                    'B': [('A', 0.7), ('B', 0.2), ('C', 0.1)],
+                    'C': [('C', 1.0)]
+                })
+
+        >>> print(ch.draw_class_connections())
+        digraph {
+            "{A, B}"
+            "{C}"
+                "{A, B}" -> "{C}"
+        }
+
+        """
+        connections = self.get_class_connections()
+        graph = gv.Digraph(format = 'svg')
+        # anonymous function to extract class labels in pretty format
+        label = lambda x: '{' + ', '.join(x) + '}'
+
+        for key in connections:
+            # add node with class label
+            graph.node(label(key))
+            for val in connections[key]:
+                graph.edge(label(key), label(val))
+
+        return graph if return_graph else graph.source
+
+    def to_dot(self, return_graph=False):
         """
         Creates a DOT format representation of this chain, where states
         are represented as labelled nodes and transitions as directed arcs
-        labelled by their probabilities.
+        labelled by their probabilities. If return_graph is set to True,
+        the graphviz.Digraph object that contains the representation is
+        returned instead.
 
-        :returns: a string representation of the markov chain in DOT format
+        :param return_graph: a boolean indicating if the underlying Digraph
+         object should be returned instead of the string representation
+        :returns: a representation of the chain in DOT format
         """
-        states_repr = "\n".join(s.to_dot_line() for s in self.states.values())
-        return "digraph {\n" + states_repr + "\n}"
+        graph = gv.Digraph(format='svg')
+        for st in self.states.values():
+            st.populate_graph(graph)
+
+        return graph if return_graph else graph.source

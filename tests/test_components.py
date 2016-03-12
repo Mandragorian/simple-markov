@@ -28,8 +28,9 @@ class TestComponents(unittest.TestCase):
             p_table
         ).communication_classes()
 
-        self.assertTrue({'C'} in comm_classes)
-        self.assertTrue({'A', 'B'} in comm_classes)
+        states = tuple(i['states'] for i in comm_classes)
+        self.assertTrue({'C'} in states)
+        self.assertTrue({'A', 'B'} in states)
 
     def test_segmented_chain(self):
         """
@@ -59,5 +60,6 @@ class TestComponents(unittest.TestCase):
             p_table
         ).communication_classes()
 
-        self.assertTrue({'C', 'D'} in comm_classes)
-        self.assertTrue({'A', 'B'} in comm_classes)
+        states = tuple(i['states'] for i in comm_classes)
+        self.assertTrue({'C', 'D'} in states)
+        self.assertTrue({'A', 'B'} in states)
