@@ -43,7 +43,7 @@ class Visualizer(object):
         nx.draw_networkx_nodes(
             graph,
             pos,
-            node_size = 1500,
+            node_size = 2000,
             node_color = 'b'
         )
 
@@ -59,13 +59,84 @@ class Visualizer(object):
             graph,
             pos,
             labels = class_labels,
-            font_size = 14
+            font_size = 12
         )
 
         if show:
             plt.show()
         return fig
-         
+
+    def redraw_networkx(self, chain, info_dict, show = True):
+        """
+        Redraws a previously drawn markov chain using info about the previously
+        created figure, including labels, nodes, edges, etc.
+
+        :param chain: the markov chain to visualize
+        :param info_dict: the dictionary containing the info about the
+         previously created plot
+        :param show: a flag indicating if the created plot should be drawn
+        :returns: the dictionary containing the figure handle as well as
+        info about edges, nodes, labels, etc. to be used in redrawing
+        """
+        # Retrieve all drawing info
+        pos_state_map = info_dict['pos_state_map']
+        edges = info_dict['edges']
+        pos = info_dict['pos']
+        fig = info_dict['fig']
+        labels = info_dict['labels']
+        graph = info_dict['graph']
+
+        try:
+            curr = chain.current_state
+        except AttributeError:
+            curr = None
+
+        states = chain.states
+        nx.draw_networkx_nodes(
+                graph,
+                pos,
+                node_color = 'r',
+                node_size = 2000,
+                nodelist = [i for i in states if i != curr]
+                )
+
+        if curr:
+        # draw current_state with green color
+            nx.draw_networkx_nodes(
+                graph,
+                pos,
+                node_color = 'g',
+                node_size = 2000,
+                nodelist = [curr]
+                )
+
+        # draw the edges of the network
+        nx.draw_networkx_edges(
+            graph,
+            pos,
+            edgelist = edges
+        )
+
+        # now draw the state labels
+        nx.draw_networkx_labels(
+            graph,
+            pos,
+            labels = labels,
+            font_size = 14
+        )
+
+        # if flag is set, show the graph
+        if show:
+            plt.show()
+
+        return {
+            'fig': fig,
+            'pos': pos,
+            'edges': edges,
+            'pos_state_map': pos_state_map,
+            'graph': graph
+        }
+
     def draw_networkx(self, chain, show = True):
         """
         Draws the markov chain's corresponding graph using networkx's drawing
@@ -73,7 +144,8 @@ class Visualizer(object):
 
         :param chain: the markov chain to be drawn
         :param show: a flag indicating if the drawn graph should be shown
-        :returns: the figure created and populated by the method
+        :returns: the dictionary containing the figure handle as well as
+         info about edges, nodes, labels, etc. to be used in redrawing
         """
         states = chain.states
         # an array of (state, position) tuples to make drawing easier
@@ -108,7 +180,7 @@ class Visualizer(object):
                 graph,
                 pos,
                 node_color = 'r',
-                node_size = 1500,
+                node_size = 2000,
                 nodelist = [i for i in states if i != curr]
                 )
         
@@ -118,7 +190,7 @@ class Visualizer(object):
                 graph,
                 pos,
                 node_color = 'g',
-                node_size = 1500,
+                node_size = 2000,
                 nodelist = [curr]
             )
 
@@ -141,7 +213,14 @@ class Visualizer(object):
         if show:
             plt.show()
 
-        return fig
+        return {
+            'fig': fig,
+            'pos': pos,
+            'edges': edges,
+            'labels': labels,
+            'pos_state_map': pos_state_map,
+            'graph': graph
+        }
 
 
 
