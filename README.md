@@ -13,7 +13,7 @@ The original files can be found [here][orig-code].
 ```python
 #!/usr/bin/env python3
 
-from simple_markov_lib import MarkovChain
+from simple_markov import MarkovChain
 
 # initial facing of the coin
 initial_probs = {
@@ -40,7 +40,7 @@ for i, step in zip(chain, range(10)):
 ```python
 #!/usr/bin/env python3
 
-from simple_markov_lib import MarkovChain
+from simple_markov import MarkovChain
 
 # initial facing of the unfair coin
 initial_probs = {
@@ -62,15 +62,16 @@ states_after = chain.state_probabilities(3)
 print(states_after)  # prints {'Heads': 0.744, 'Tails': 0.256}
 ```
 
-### Running the tests
-Test files for `simple_markov_lib` are included in the `tests/` subfolder.
-Run them with
+## Installing as a pip package
+For now, `simple-markov` has not been added to the PyPI package index.
+Therefore you will need to work locally. 
+First, clone the package branch of the repo:
 
-```bash
-$ python -m unittest
+```shell
+git clone -b package git@github.com:VHarisop/simple-markov.git
 ```
 
-as long as your current working directory is the project's root folder.
+Then, simply run `pip install -r requirements.txt .`
 
 [orig-code]: http://www.math.ntua.gr/~loulakis/info/python_codes_files/
 [tetraktida]: https://github.com/tetraktida
