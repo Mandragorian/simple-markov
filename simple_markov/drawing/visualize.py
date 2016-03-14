@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import simple_markov_lib as lib
 import networkx as nx
 import matplotlib.pyplot as plt
 

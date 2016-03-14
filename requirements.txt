@@ -1,0 +1,7 @@
+simple_markov
+
+numpy
+scipy
+matplotlib
+networkx
+graphviz
