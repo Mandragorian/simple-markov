@@ -13,7 +13,7 @@ The original files can be found [here][orig-code].
 ```python
 #!/usr/bin/env python3
 
-from simple_markov_lib import MarkovChain
+from simple_markov import MarkovChain
 
 # initial facing of the coin
 initial_probs = {
@@ -40,7 +40,7 @@ for i, step in zip(chain, range(10)):
 ```python
 #!/usr/bin/env python3
 
-from simple_markov_lib import MarkovChain
+from simple_markov import MarkovChain
 
 # initial facing of the unfair coin
 initial_probs = {
@@ -62,15 +62,46 @@ states_after = chain.state_probabilities(3)
 print(states_after)  # prints {'Heads': 0.744, 'Tails': 0.256}
 ```
 
-### Running the tests
-Test files for `simple_markov_lib` are included in the `tests/` subfolder.
-Run them with
+* Create a Markov chain and get its communication classes
 
-```bash
-$ python -m unittest
+```python
+#!/usr/bin/env python3
+
+from simple_markov import MarkovChain
+
+# Create a markov chain with 4 states and 2 communication classes
+
+initial_probs = {
+	'A': 0.25,
+	'B': 0.25,
+	'C': 0.25,
+	'D': 0.25
+}
+
+transition_table = {
+	'A': [('A', 0.5), ('B', 0.4), ('C', 0.1)],
+	'B': [('A', 1.0)],
+	'C': [('C', 0.2), ('D', 0.8)],
+	'D': [('C', 0.5), ('D', 0.5)]
+}
+
+chain = MarkovChain(initial_probs, transition_table)
+
+# get the communication classes
+comm_classes = chain.communication_classes()
+print(comm_classes)
 ```
 
-as long as your current working directory is the project's root folder.
+## Installing as a pip package
+For now, `simple-markov` has not been added to the PyPI package index.
+Therefore you will need to work locally. 
+First, clone the package branch of the repo:
+
+```shell
+git clone -b package git@github.com:VHarisop/simple-markov.git
+```
+
+Then, simply run `pip install -r requirements.txt .`
 
 [orig-code]: http://www.math.ntua.gr/~loulakis/info/python_codes_files/
 [tetraktida]: https://github.com/tetraktida

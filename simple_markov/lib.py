@@ -6,11 +6,11 @@ import random as rnd
 try:
     from itertools import accumulate
 except ImportError:
-    from utils import accumulate
+    from simple_markov.utils import accumulate
 
 # import strongly_connected_components function for
 # MarkovChain.communication_classes()
-from utils import strongly_connected_components
+from simple_markov.utils import strongly_connected_components
 
 # scipy - numpy imports for probability matrix algebra
 from scipy import sparse
