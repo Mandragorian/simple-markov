@@ -62,6 +62,36 @@ states_after = chain.state_probabilities(3)
 print(states_after)  # prints {'Heads': 0.744, 'Tails': 0.256}
 ```
 
+* Create a Markov chain and get its communication classes
+
+```python
+#!/usr/bin/env python3
+
+from simple_markov import MarkovChain
+
+# Create a markov chain with 4 states and 2 communication classes
+
+initial_probs = {
+	'A': 0.25,
+	'B': 0.25,
+	'C': 0.25,
+	'D': 0.25
+}
+
+transition_table = {
+	'A': [('A', 0.5), ('B', 0.4), ('C', 0.1)],
+	'B': [('A', 1.0)],
+	'C': [('C', 0.2), ('D', 0.8)],
+	'D': [('C', 0.5), ('D', 0.5)]
+}
+
+chain = MarkovChain(initial_probs, transition_table)
+
+# get the communication classes
+comm_classes = chain.communication_classes()
+print(comm_classes)
+```
+
 ## Installing as a pip package
 For now, `simple-markov` has not been added to the PyPI package index.
 Therefore you will need to work locally. 
