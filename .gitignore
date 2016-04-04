@@ -3,3 +3,6 @@ __pycache__/
 
 # ignore bytecode
 *.pyc
+
+# ignore swap files
+*.swp
