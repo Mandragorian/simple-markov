@@ -112,6 +112,9 @@ class MarkovChain(object):
         sz = len(labels)
         self.prob_matrix = sparse.coo_matrix((data, (row, col)), shape=(sz, sz))
 
+        # initialize current_state to None
+        self.current_state = None
+
     def __iter__(self):
         """
         Makes this object iterable - chooses an initial state.
@@ -136,7 +139,7 @@ class MarkovChain(object):
         Chooses the next state for the markov chain.
         """
         # shouldn't happen, but let's be safe.
-        if not self.current_state:
+        if self.current_state == None:
             raise StopIteration
 
         self.steps += 1
