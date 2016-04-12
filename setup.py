@@ -15,7 +15,8 @@ setup(
     ],
     packages = [
         'simple_markov',
-        'simple_markov.drawing'
+        'simple_markov.drawing',
+        'simple_markov.io'
     ],
 
     install_requires = [
