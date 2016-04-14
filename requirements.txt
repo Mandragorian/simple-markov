@@ -3,3 +3,4 @@ scipy
 matplotlib
 networkx
 graphviz
+pyyaml
