@@ -3,8 +3,11 @@ python:
         - "3.2"
         - "3.3"
         - "3.4"
-virtualenv:
-        system_site_packages: true
+before_script:
+  - wget http://repo.continuum.io/miniconda/Miniconda-3.8.3-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - export PATH=/home/travis/miniconda/bin:$PATH
+  - conda install --yes numpy=1.11
 before_install:
         - sudo apt-get install -qq python-numpy python-scipy python-matplotlib
 install: "pip install -r requirements.txt"
