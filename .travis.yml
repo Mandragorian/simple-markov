@@ -4,7 +4,8 @@ python:
         - "3.3"
         - "3.4"
         - "3.5"
-
+before_install:
+        - sudo apt-get install -qq python-numpy python-scipy python-matplotlib
 install: "pip install --force-reinstall -r requirements.txt"
 
 script: make test
