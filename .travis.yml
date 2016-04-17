@@ -1,9 +1,13 @@
 language: python
 python:
-        - "3.2_with_system_site_packages"
-        - "3.3_with_system_site_packages"
-        - "3.4_with_system_site_packages"
-        - "3.5_with_system_site_packages"
+        - "3.2"
+        - "3.3"
+        - "3.4"
+        - "3.5"
+virtualenv:
+        - system_site_packages: true
+        -  SITE_PKG_DIR=$VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/site-packages
+        -  rm -f $VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/no-global-site-packages.txt
 before_install:
         - sudo apt-get install -qq python-numpy python-scipy python-matplotlib
 install: "pip install -r requirements.txt"
