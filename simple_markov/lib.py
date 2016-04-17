@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import random as rnd
-
 # import accumulate from utils if python v3.x
 # is not available
 try:
@@ -200,7 +199,7 @@ class MarkovChain(object):
         {'A': 0.6, 'B', 0.4}
 
         """
-        
+
         labels = sorted(self.initial_probs)
         tran_matrix = self.prob_matrix.toarray()
         # adjust transition matrix according to number of steps
@@ -217,6 +216,34 @@ class MarkovChain(object):
         return {
             v[0]: v[1] for v in zip(labels, future_probs_vec)
         }
+
+    def monte_carlo_estimation(self, experiments, term_condition, hit_condition):
+        """
+        Calculates the probability that hit_condition holds before
+        term_condition happens.
+
+        :param experiments: the number of experiments ran.
+
+        :param term_condition: a function accepting a state as an argument.
+         If it returns true the current experiment running is terminated.
+
+        :param hit_condition: a function accepting a state as an argument.
+         It returns true when a state should be counted as a hit.
+
+         :returns: a tuple containing the number of hits and the number of steps
+          that occured in the experiments.
+        """
+        counter = 0
+        steps = 0
+        for i in range(experiments):
+            chain = iter(self)
+            for _ in chain:
+                steps += 1
+                if hit_condition(chain.current_state):
+                    counter += 1
+                if term_condition(chain.current_state):
+                    break
+        return (counter, steps)
 
     def to_graph(self):
         """
@@ -253,7 +280,7 @@ class MarkovChain(object):
                 'B': [('A', 0.5), ('B', 0.3), ('C', 0.2)],
                 'C': [('C', 1.0)]
             })
-        
+
         >>> m_chain.communication_classes()
         [{'states': {'C'}, 'type': 'closed'},
          {'states': {'A', 'B'}, 'type': 'open'}]
@@ -269,7 +296,7 @@ class MarkovChain(object):
         all connections between them.
 
         :returns: a dictionary containing all inter-class connections, where
-         keys / values are tuples / lists of tuples containing the class 
+         keys / values are tuples / lists of tuples containing the class
          states.
 
         >>> ch = MarkovChain(
