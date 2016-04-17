@@ -5,9 +5,7 @@ python:
         - "3.4"
         - "3.5"
 virtualenv:
-        - system_site_packages: true
-        -  SITE_PKG_DIR=$VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/site-packages
-        -  rm -f $VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/no-global-site-packages.txt
+        system_site_packages: true
 before_install:
         - sudo apt-get install -qq python-numpy python-scipy python-matplotlib
 install: "pip install -r requirements.txt"
