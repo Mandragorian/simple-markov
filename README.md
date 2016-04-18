@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/VHarisop/simple-markov.svg?branch=master)](https://travis-ci.org/VHarisop/simple-markov)
+
 # simple-markov
 A simple library for simulating Markov Chains. Initially used in Stochastic
 Processes course in NTUA.
