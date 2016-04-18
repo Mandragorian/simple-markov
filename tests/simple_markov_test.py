@@ -33,6 +33,61 @@ class TestSimulation(unittest.TestCase):
         self.assertTrue(len(list(gen_exp)) == 0)
 
 class TestComponents(unittest.TestCase):
+    def test_arbitrary_labels(self):
+        """
+        Tests if the chain's labels work properly, if the labels are not
+        of type string.
+        """
+        # Create a proof-of-concept class that provides a hash() and
+        # ordering methods.
+        class C(object):
+            def __init__(self, val):
+                self.val = val
+            def __hash__(self):
+                return hash(self.val)
+            def __eq__(self, other):
+                return self.val == other.val
+            def __str__(self):
+                return 'C: %s' % str(self.val)
+            def __repr__(self):
+                return 'C: %s' % repr(self.val)
+            def __lt__(self, rhs):
+                return self.val < rhs.val
+            def __gt__(self, rhs):
+                return self.val > rhs.val
+            def __ge__(self, rhs):
+                return self.val >= rhs.val
+            def __le__(self, rhs):
+                return self.val <= rhs.val
+
+        # initial probability table
+        init_probs = {
+            C(5): 0.1,
+            C(7): 0.2,
+            C(1): 0.2,
+            C(10): 0.1,
+            C(6): 0.2,
+            C(4): 0.2
+        }
+
+        # transition table
+        transition_table = {
+            C(5): [(C(7), 0.7), (C(1), 0.1), (C(10), 0.2)],
+            C(1): [(C(7), 0.5), (C(10), 0.5)],
+            C(7): [(C(7), 0.9), (C(5), 0.1)],
+            C(10): [(C(5), 0.3), (C(10), 0.5), (C(4), 0.2)],
+            C(4): [(C(4), 0.5), (C(6), 0.5)],
+            C(6): [(C(4), 1.0)]
+        }
+
+        # these two methods should not fail
+        chain = MarkovChain(init_probs, transition_table)
+        classes = chain.communication_classes()
+        
+        # did it find the correct classes though?
+        states = tuple(i['states'] for i in classes)
+        self.assertTrue({C(4), C(6)} in states)
+
     def test_simple_chain(self):
         """
         Tests if the chain's communication classes are identified
