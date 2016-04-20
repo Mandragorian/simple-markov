@@ -16,10 +16,10 @@ class TestSimulation(unittest.TestCase):
 
         # transition probability table
         p_table = {
-            'A': [('A', 0.5), ('B', 0.5)],
-            'B': [('A', 0.2), ('B', 0.6), ('C', 0.2)],
-            'C': [('D', 0.5), ('C', 0.5)],
-            'D': [('C', 0.9), ('D', 0.1)]
+            'A': [('A', "0.5"), ('B', "0.5")],
+            'B': [('A', "0.2"), ('B', "0.6"), ('C', "0.2")],
+            'C': [('D', "0.5"), ('C', "0.5")],
+            'D': [('C', "0.9"), ('D', "0.1")]
         }
 
         # create the chain
@@ -72,18 +72,18 @@ class TestComponents(unittest.TestCase):
 
         # transition table
         transition_table = {
-            C(5): [(C(7), 0.7), (C(1), 0.1), (C(10), 0.2)],
-            C(1): [(C(7), 0.5), (C(10), 0.5)],
-            C(7): [(C(7), 0.9), (C(5), 0.1)],
-            C(10): [(C(5), 0.3), (C(10), 0.5), (C(4), 0.2)],
-            C(4): [(C(4), 0.5), (C(6), 0.5)],
-            C(6): [(C(4), 1.0)]
+            C(5): [(C(7), "0.7"), (C(1), "0.1"), (C(10), "0.2")],
+            C(1): [(C(7), "0.5"), (C(10), "0.5")],
+            C(7): [(C(7), "0.9"), (C(5), "0.1")],
+            C(10): [(C(5), "0.3"), (C(10), "0.5"), (C(4), "0.2")],
+            C(4): [(C(4), "0.5"), (C(6), "0.5")],
+            C(6): [(C(4), "1.0")]
         }
 
         # these two methods should not fail
         chain = MarkovChain(init_probs, transition_table)
         classes = chain.communication_classes()
-        
+
         # did it find the correct classes though?
         states = tuple(i['states'] for i in classes)
         self.assertTrue({C(4), C(6)} in states)
@@ -100,9 +100,9 @@ class TestComponents(unittest.TestCase):
         }
 
         p_table = {
-            'A': [('A', 0.5), ('B', 0.5)],
-            'B': [('A', 0.8), ('B', 0.1), ('C', 0.1)],
-            'C': [('C', 1.0)]
+            'A': [('A', "0.5"), ('B', "0.5")],
+            'B': [('A', "0.8"), ('B', "0.1"), ('C', "0.1")],
+            'C': [('C', "1.0")]
         }
 
         comm_classes = MarkovChain(init_probs, p_table).communication_classes()
@@ -125,10 +125,10 @@ class TestComponents(unittest.TestCase):
         }
 
         p_table = {
-            'A': [('A', 0.5), ('B', 0.5)],
-            'B': [('A', 0.2), ('B', 0.6), ('C', 0.2)],
-            'C': [('D', 0.5), ('C', 0.5)],
-            'D': [('C', 0.9), ('D', 0.1)]
+            'A': [('A', "0.5"), ('B', "0.5")],
+            'B': [('A', "0.2"), ('B', "0.6"), ('C', "0.2")],
+            'C': [('D', "0.5"), ('C', "0.5")],
+            'D': [('C', "0.9"), ('D', "0.1")]
         }
 
         comm_classes = MarkovChain(init_probs, p_table).communication_classes()

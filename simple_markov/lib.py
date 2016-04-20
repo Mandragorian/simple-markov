@@ -14,11 +14,16 @@ from simple_markov.utils import strongly_connected_components
 # scipy - numpy imports for probability matrix algebra
 from scipy import sparse
 import numpy as np
-
+from fractions import Fraction
 # import graphviz for graph drawing
 import graphviz as gv
 
 import bisect
+
+class ProbabilityDistributionError(Exception):
+
+    def __init(self, message):
+        self.message = message
 
 class State(object):
     """
@@ -33,8 +38,11 @@ class State(object):
         :param distribution: an iterable of state - transition probability pairs
         :param label: the label of the state
         """
-        self.prob = { d[0]: d[1] for d in distribution if 0 < d[1] <= 1 }
+        self.prob = { d[0]: Fraction(d[1]) for d in distribution if 0 < float(d[1]) <= 1 }
         self.cum_prob = list(accumulate(v for v in self.prob.values()))
+        if self.cum_prob[-1] != 1:
+            raise ProbabilityDistributionError("Transitions from state " + str(label) +
+                    " do not form a probability distribution")
         self.label = label
 
     def next_state(self):
