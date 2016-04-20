@@ -402,3 +402,44 @@ class MarkovChain(object):
             st.populate_graph(graph)
 
         return graph if return_graph else graph.source
+
+
+class InfiniteMarkovChain(object):
+    """
+    An iterable that represents a discrete but infinite Markov Chain.
+    """
+    def __init__(self, initial_state, transition_table):
+        """
+        Creates a new InfiniteMarkovChain with specified initial state
+        and given transition rules table
+
+        :param initial_state: the starting state of the infite chain
+        :param transition_table: a list containing tuples of probabilites and rules.
+         The rules are functions that accept the current state and return the next state of the chain.
+        """
+        self.initial_state = initial_state
+        self.table = transition_table
+        self.current_state = initial_state
+        self.cum_prob = list(accumulate(v[0] for v in self.table))
+        print(self.cum_prob)
+        self.steps = 0
+
+    def __iter__(self):
+        """
+        Make this object iterable and re-initializes it
+        """
+        self.current_state = self.initial_state
+        self.steps = 0
+        return self
+
+    def __next__(self):
+        """
+        Determines the next state of the markov chain
+        """
+        coin_toss = rnd.uniform(0, 1)
+        transition = self.table[bisect.bisect_left(self.cum_prob, coin_toss)][1]
+        self.current_state = transition(self.current_state)
+        return self.current_state
+
+
+
