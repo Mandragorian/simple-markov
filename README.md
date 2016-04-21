@@ -10,7 +10,7 @@ The original files can be found [here][orig-code].
 
 ### Examples
 
-* Simulate a coin toss
+#### Simulate a coin toss
 
 ```python
 #!/usr/bin/env python3
@@ -37,7 +37,7 @@ for i, step in zip(chain, range(10)):
 	
 ```
 
-* Get the state probabilities after N steps
+#### Get the state probabilities after N steps
 
 ```python
 #!/usr/bin/env python3
@@ -64,7 +64,7 @@ states_after = chain.state_probabilities(3)
 print(states_after)  # prints {'Heads': 0.744, 'Tails': 0.256}
 ```
 
-* Create a Markov chain and get its communication classes
+#### Create a Markov chain and get its communication classes
 
 ```python
 #!/usr/bin/env python3
@@ -94,7 +94,8 @@ comm_classes = chain.communication_classes()
 print(comm_classes)
 ```
 
-* Using arbitrary objects as state labels
+#### Using arbitrary objects as state labels
+
 In recent versions, you can use any kind of object as state label, as long as
 it is an ordered (required for fundamental operations, e.g. choosing next
 state) and hashable type. For example:
@@ -136,7 +137,7 @@ chain = MarkovChain(init_probs, transition_table)
 You can also read chains from .yaml or .json files, using the `io` subpackage.
 In JSON, the structure of the file should be:
 
-```json
+```
 {
 	"Initial": {
 		"State 1": Probability 1,
