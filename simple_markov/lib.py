@@ -20,11 +20,6 @@ import graphviz as gv
 
 import bisect
 
-class ProbabilityDistributionError(Exception):
-
-    def __init(self, message):
-        self.message = message
-
 class State(object):
     """
     Represents a state in a markov chain.
@@ -41,7 +36,7 @@ class State(object):
         self.prob = { d[0]: Fraction(d[1]) for d in distribution if 0 < float(d[1]) <= 1 }
         self.cum_prob = list(accumulate(v for v in self.prob.values()))
         if self.cum_prob[-1] != 1:
-            raise ProbabilityDistributionError("Transitions from state " + str(label) +
+            raise ValueError("Transitions from state " + str(label) +
                     " do not form a probability distribution")
         self.label = label
 
