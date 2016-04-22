@@ -62,12 +62,12 @@ class TestComponents(unittest.TestCase):
 
         # initial probability table
         init_probs = {
-            C(5): 0.1,
-            C(7): 0.2,
-            C(1): 0.2,
-            C(10): 0.1,
-            C(6): 0.2,
-            C(4): 0.2
+            C(5): "0.1",
+            C(7): "0.2",
+            C(1): "0.2",
+            C(10): "0.1",
+            C(6): "0.2",
+            C(4): "0.2"
         }
 
         # transition table
@@ -94,9 +94,9 @@ class TestComponents(unittest.TestCase):
         properly for a chain with 3 states, one of which is a sink.
         """
         init_probs = {
-            'A': 0.3,
-            'B': 0.4,
-            'C': 0.3
+            'A': "0.3",
+            'B': "0.4",
+            'C': "0.3"
         }
 
         p_table = {
@@ -118,10 +118,10 @@ class TestComponents(unittest.TestCase):
         """
 
         init_probs = {
-            'A': 0.25,
-            'B': 0.25,
-            'C': 0.25,
-            'D': 0.25
+            'A': "0.25",
+            'B': "0.25",
+            'C': "0.25",
+            'D': "0.25"
         }
 
         p_table = {
@@ -135,3 +135,64 @@ class TestComponents(unittest.TestCase):
         states = tuple(i['states'] for i in comm_classes)
         self.assertTrue({'C', 'D'} in states)
         self.assertTrue({'A', 'B'} in states)
+
+    def test_bad_initial_probs(self):
+        """
+        Tests if a bad initial distribution is caught and an exception
+        is raised.
+        """
+
+        err_string = ("initial_distrib does not form a proper "
+                      "probability distribution")
+        flag = False
+
+        init_probs = {
+                'A' : "0.25",
+                'B' : "0.25",
+                'C' : "0.52",
+                'D' : "0.25"
+	}
+
+        p_table = {
+            'A': [('A', "0.5"), ('B', "0.5")],
+            'B': [('A', "0.2"), ('B', "0.6"), ('C', "0.2")],
+            'C': [('D', "0.5"), ('C', "0.5")],
+            'D': [('C', "0.9"), ('D', "0.1")]
+        }
+
+        try:
+            m = MarkovChain(init_probs, p_table)
+        except ValueError as e:
+            self.assertEqual(e.args[0], err_string)
+            flag = True
+
+        self.assertTrue(flag)
+
+    def test_bad_transitioon_table(self):
+        """
+        Tests if a bad initial distribution is caught and an exception
+        is raised.
+        """
+        err_string = ("Transitions from state D do not form a "
+                      "probability distribution")
+        flag = False
+
+        init_probs = {
+                'A' : "0.25",
+                'B' : "0.25",
+                'C' : "0.25",
+                'D' : "0.25"
+        }
+
+        p_table = {
+            'A': [('A', "0.5"), ('B', "0.5")],
+            'B': [('A', "0.2"), ('B', "0.6"), ('C', "0.2")],
+            'C': [('D', "0.5"), ('C', "0.5")],
+            'D': [('C', "0.9"), ('D', "1.1")]
+        }
+
+        try:
+            m = MarkovChain(init_probs, p_table)
+        except ValueError as e:
+            self.assertEqual(e.args[0], err_string)
+            flag = True

@@ -87,7 +87,12 @@ class MarkovChain(object):
         :param initial_distrib: a map of states to initial probabilities
         :param transition_table: a 2D table containing transition probabilites
         """
-        self.initial_probs = initial_distrib
+
+        self.initial_probs = { k : Fraction(v) for k,v in initial_distrib.items() }
+
+        if sum(self.initial_probs.values()) != 1:
+            raise ValueError("initial_distrib does not form a proper probability "
+                              "distribution")
 
         # map of label-to-state pairs
         self.states = {
