@@ -14,7 +14,7 @@ from simple_markov.utils import strongly_connected_components
 # scipy - numpy imports for probability matrix algebra
 from scipy import sparse
 import numpy as np
-
+from fractions import Fraction
 # import graphviz for graph drawing
 import graphviz as gv
 
@@ -33,8 +33,11 @@ class State(object):
         :param distribution: an iterable of state - transition probability pairs
         :param label: the label of the state
         """
-        self.prob = { d[0]: d[1] for d in distribution if 0 < d[1] <= 1 }
+        self.prob = { d[0]: Fraction(d[1]) for d in distribution if 0 < float(d[1]) <= 1 }
         self.cum_prob = list(accumulate(v for v in self.prob.values()))
+        if self.cum_prob[-1] != 1:
+            raise ValueError("Transitions from state " + str(label) +
+                    " do not form a probability distribution")
         self.label = label
 
     def next_state(self):
@@ -84,7 +87,12 @@ class MarkovChain(object):
         :param initial_distrib: a map of states to initial probabilities
         :param transition_table: a 2D table containing transition probabilites
         """
-        self.initial_probs = initial_distrib
+
+        self.initial_probs = { k : Fraction(v) for k,v in initial_distrib.items() }
+
+        if sum(self.initial_probs.values()) != 1:
+            raise ValueError("initial_distrib does not form a proper probability "
+                              "distribution")
 
         # map of label-to-state pairs
         self.states = {
