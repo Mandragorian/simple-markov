@@ -11,8 +11,6 @@ except ImportError:
 # MarkovChain.communication_classes()
 from simple_markov.utils import strongly_connected_components
 
-# scipy - numpy imports for probability matrix algebra
-from scipy import sparse
 import numpy as np
 from fractions import Fraction
 # import graphviz for graph drawing
@@ -108,8 +106,6 @@ class MarkovChain(object):
         # store the transition table for future reference
         self.transition_table = transition_table
 
-
-    def create_sparse_frame(self):
         # initialize current_state to None
         self.current_state = None
 
@@ -227,10 +223,7 @@ class MarkovChain(object):
                                 self.transition_table[key][j][1]
                             ))
                             sparse_frame.append((curr_elem, i, j))
-                        except KeyError:
-                            # continue with next element
-                            continue
-                        except IndexError:
+                        except (KeyError, IndexError):
                             # continue with next element
                             continue
                 # get data and row - column vectors for sparse representation
