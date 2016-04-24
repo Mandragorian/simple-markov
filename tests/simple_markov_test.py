@@ -196,3 +196,46 @@ class TestComponents(unittest.TestCase):
         except ValueError as e:
             self.assertEqual(e.args[0], err_string)
             flag = True
+    def test_monte_carlo(self):
+        """
+        Tests if monte carlo method functions properly
+        """
+        N = 10000
+
+        p = 0.6
+        q = 1-p
+
+        init_probs = {
+                '0-0':1.0
+        }
+
+        markov_table = {
+            '0-0':[('15-0',p),('0-15',q)],
+            '15-0':[('30-0',p),('15-15',q)],
+            '0-15':[('15-15',p),('0-30',q)],
+            '30-0':[('40-0',p),('30-15',q)],
+            '15-15':[('30-15',p),('15-30',q)],
+            '0-30':[('15-30',p),('0-40',q)],
+            '40-0':[('A',p),('40-15',q)],
+            '30-15':[('40-15',p),('D',q)],
+            '15-30':[('D',p),('15-40',q)],
+            '0-40':[('15-40',p),('B',q)],
+            '40-15':[('A',p),('AA',q)],
+            'D':[('AA',p),('BB',q)],
+            '15-40':[('BB',p),('B',q)],
+            'AA':[('A',p),('D',q)],
+            'BB':[('D',p),('B',q)],
+            'A':[('A',1)],
+            'B':[('B',1)]
+        }
+
+        def a_won(state):
+            return state == 'A'
+
+        def game_ended(state):
+            return state in ['A', 'B']
+
+        m = MarkovChain(init_probs, markov_table)
+        hits, steps = m.monte_carlo_estimation(N, game_ended, a_won)
+        self.assertTrue(hits > 7250 and hits < 7480)
+        self.assertTrue(steps > 64000 and steps < 65500)
