@@ -142,8 +142,9 @@ class TestComponents(unittest.TestCase):
         is raised.
         """
 
-        err_string = ("initial_distrib does not form a proper "
-                      "probability distribution")
+        err_string = (
+            "Initial probabilities don't form a proper distribution"
+        )
         flag = False
 
         init_probs = {
