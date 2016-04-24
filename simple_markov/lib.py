@@ -11,8 +11,6 @@ except ImportError:
 # MarkovChain.communication_classes()
 from simple_markov.utils import strongly_connected_components
 
-# scipy - numpy imports for probability matrix algebra
-from scipy import sparse
 import numpy as np
 from fractions import Fraction
 # import graphviz for graph drawing
@@ -33,7 +31,10 @@ class State(object):
         :param distribution: an iterable of state - transition probability pairs
         :param label: the label of the state
         """
-        self.prob = { d[0]: Fraction(d[1]) for d in distribution if 0 < float(d[1]) <= 1 }
+        self.prob = {
+            d[0]: Fraction(d[1]) for d in distribution \
+            if 0 < Fraction(d[1]) <= 1
+        }
         self.cum_prob = list(accumulate(v for v in self.prob.values()))
         if self.cum_prob[-1] != 1:
             raise ValueError("Transitions from state " + str(label) +
@@ -88,36 +89,22 @@ class MarkovChain(object):
         :param transition_table: a 2D table containing transition probabilites
         """
 
-        self.initial_probs = { k : Fraction(v) for k,v in initial_distrib.items() }
+        self.initial_probs = {
+            k : Fraction(v) for k,v in initial_distrib.items()
+        }
 
         if sum(self.initial_probs.values()) != 1:
-            raise ValueError("initial_distrib does not form a proper probability "
-                              "distribution")
+            raise ValueError(
+                "Initial probabilities don't form a proper distribution"
+            )
 
         # map of label-to-state pairs
         self.states = {
             k: State(transition_table[k], k) for k in transition_table
         }
 
-        # create a frame that holds (row, column, value) entries
-        # which will be used later to create the sparse array
-        sparse_frame = []
-        labels = sorted(key for key in self.states)
-        for i, key in enumerate(labels):
-            for j in range(len(labels)):
-                try:
-                    sparse_frame.append((transition_table[key][j][1], i, j))
-                except KeyError:
-                    # continue with next element
-                    continue
-                except IndexError:
-                    # continue with next element
-                    continue
-
-        # get data and row - column vectors for sparse representation
-        data, row, col = zip(*sparse_frame)
-        sz = len(labels)
-        self.prob_matrix = sparse.coo_matrix((data, (row, col)), shape=(sz, sz))
+        # store the transition table for future reference
+        self.transition_table = transition_table
 
         # initialize current_state to None
         self.current_state = None
@@ -210,9 +197,65 @@ class MarkovChain(object):
         {'A': 0.6, 'B', 0.4}
 
         """
+        try:
+            # if matrix is already available, skip extra work
+            prob_mat = self.prob_matrix
+        except AttributeError:
+            # otherwise, we'll have to initialize
+            # if scipy is available, use its sparse matrix
+            try:
+                from scipy.sparse import coo_matrix
+                has_scipy = True
+            except ImportError:
+                has_scipy = False
 
-        labels = sorted(self.initial_probs)
-        tran_matrix = self.prob_matrix.toarray()
+            # sort labels for stable representation
+            labels = sorted(key for key in self.states)
+            size = len(labels)
+
+            if has_scipy:
+                sparse_frame = []
+                for i, key in enumerate(labels):
+                    for j in range(size):
+                        try:
+                            # convert all fractions to pure floats
+                            curr_elem = float(Fraction(
+                                self.transition_table[key][j][1]
+                            ))
+                            sparse_frame.append((curr_elem, i, j))
+                        except (KeyError, IndexError):
+                            # continue with next element
+                            continue
+                # get data and row - column vectors for sparse representation
+                data, row, col = zip(*sparse_frame)
+                self.prob_matrix = sparse.coo_matrix(
+                    (data, (row, col)),
+                    shape=(size, size)
+                )
+            # No scipy available, use simple numpy instead
+            else:
+                self.prob_matrix = np.zeros(shape = (size, size))
+                for i, key in enumerate(labels):
+                    for j in range(size):
+                        try:
+                            curr_elem = float(Fraction(
+                                self.transition_table[key][j][i]
+                            ))
+                        except (KeyError, IndexError):
+                            # fill with 0 and continue
+                            curr_elem = 0
+
+                        self.prob_matrix[i][j] = curr_elem
+
+            # creation has been finished - assign matrix
+            prob_mat = self.prob_matrix
+
+        # If matrix is already of the numpy type, catch the AttributeError
+        try:
+            tran_matrix = prob_mat.toarray()
+        except AttributeError:
+            tran_matrix = prob_mat
+
         # adjust transition matrix according to number of steps
         if steps > 1:
             tran_matrix = np.linalg.matrix_power(tran_matrix, steps)
